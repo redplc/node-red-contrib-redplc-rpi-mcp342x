@@ -1,4 +1,4 @@
-# node-red-contrib-redplc-mcp342x
+# node-red-contrib-redplc-rpi-mcp342x
 
 Node-Red node for mcp3421 .. mcp3428 analog to digital converter<br>
 
@@ -33,7 +33,7 @@ For using with other nodes, install
 Install with Node-Red Palette Manager or npm command:
 ```
 cd ~/.node-red
-npm install node-red-contrib-redplc-mcp342x
+npm install node-red-contrib-redplc-rpi-mcp342x
 ```
 
 ## Usage
