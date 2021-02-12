@@ -1,0 +1,227 @@
+<!--
+  Copyright 2021 Ocean (iot.redplc@gmail.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/javascript">
+    RED.nodes.registerType('mcp342x', {
+        category: 'redPlc modules',
+        color: 'ORANGE',
+        paletteLabel: 'mcp342x',
+        defaults: {
+            addressai:  { value: 0, required: true, validate: function (v) { return RED.validators.number(v) && (v >= 0) && (v <= 999); } },
+            devtype: { value: "4", required: true },
+            devadr:  { value: "0", required: true },
+            mode0:   { value: "0", required: true },
+            mode1:   { value: "0", required: true },
+            mode2:   { value: "0", required: true },
+            mode3:   { value: "0", required: true },
+            gain0:   { value: "0", required: true },
+            gain1:   { value: "0", required: true },
+            gain2:   { value: "0", required: true },
+            gain3:   { value: "0", required: true },
+            factor0: { value: 1, required: true, validate: function (v) { return !isNaN(Number(v)); } },
+            factor1: { value: 1, required: true, validate: function (v) { return !isNaN(Number(v)); } },
+            factor2: { value: 1, required: true, validate: function (v) { return !isNaN(Number(v)); } },
+            factor3: { value: 1, required: true, validate: function (v) { return !isNaN(Number(v)); } },
+            offset0: { value: 0, required: true, validate: function (v) { return !isNaN(Number(v)); } },
+            offset1: { value: 0, required: true, validate: function (v) { return !isNaN(Number(v)); } },
+            offset2: { value: 0, required: true, validate: function (v) { return !isNaN(Number(v)); } },
+            offset3: { value: 0, required: true, validate: function (v) { return !isNaN(Number(v)); } },
+        },
+        inputs: 1,
+        outputs: 1,
+        inputLabels: "in:string",
+        outputLabels: ["out:string"],
+        icon: "raspi.png",
+        label: function () {
+            switch(this.devtype) {
+                case "1": return "mcp3421 @68H";
+                case "2": return "mcp3422 @68H";
+                case "3": return "mcp3423 @" + (0x68 + parseInt(this.devadr)).toString(16).toUpperCase() + "H";
+                case "4": return "mcp3424 @" + (0x68 + parseInt(this.devadr)).toString(16).toUpperCase() + "H";
+                case "5": return "mcp3425 @68H";
+                case "6": return "mcp3426 @68H";
+                case "7": return "mcp3427 @" + (0x68 + parseInt(this.devadr)).toString(16).toUpperCase() + "H";
+                case "8": return "mcp3428 @" + (0x68 + parseInt(this.devadr)).toString(16).toUpperCase() + "H";
+            } 
+        },
+        oneditprepare: function () {
+            function init_devtype(devtype) {
+                $("#div-devadr").hide();
+                $("#div-input1").hide();
+                $("#div-input2").hide();
+                $("#div-input3").hide();
+
+                switch (devtype) {
+                    case "2":
+                    case "6":
+                        $("#div-input1").show();
+                        break;
+                    case "3":
+                    case "7":
+                        $("#div-devadr").show();
+                        $("#div-input1").show();
+                        break;
+                    case "4":
+                    case "8":
+                        $("#div-devadr").show();
+                        $("#div-input1").show();
+                        $("#div-input2").show();
+                        $("#div-input3").show();
+                }
+            }
+
+            $("#node-input-devtype").on("change", function () { init_devtype(this.value); }).change();
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="mcp342x">
+    <div class="form-row">
+        <label style="width:100%; border-bottom: 1px solid #eee;">redPlc mcp342x Module</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-addressai"><i class="fa fa-list"></i> Address <b>&nbsp;IA<b></label>
+        <input id="node-input-addressai" placeholder="Address" value=0 input type="number" min="0" max="999" required style="width: auto;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-devtype"><i class="fa fa-microchip"></i> Dev-Type</label>
+        <select type="text" id="node-input-devtype" style="width: auto;">
+            <option value="1">mcp3421</option>
+            <option value="2">mcp3422</option>
+            <option value="3">mcp3423</option>
+            <option value="4">mcp3424</option>
+            <option value="5">mcp3425</option>
+            <option value="6">mcp3426</option>
+            <option value="7">mcp3427</option>
+            <option value="8">mcp3428</option>
+        </select>
+    </div>
+    <div id="div-devadr" class="form-row">
+        <label for="node-input-devadr"><i class="fa fa-cogs"></i> Dev-Addr.</label>
+        <select type="text" id="node-input-devadr" style="width: auto;">
+            <option value="0">68H</option>
+            <option value="1">69H</option>
+            <option value="2">6AH</option>
+            <option value="3">6BH</option>
+            <option value="4">6CH</option>
+            <option value="5">6DH</option>
+            <option value="6">6EH</option>
+            <option value="7">6FH</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label style="width:100%; border-bottom: 1px solid #a9a9a9;">Input CH1</label>
+        <label for="node-input-mode0"><i class="fa fa-retweet"></i> Mode</label>
+        <select type="text" id="node-input-mode0" style="width: auto;">
+            <option value="0">12bit</option>
+            <option value="1">14bit</option>
+            <option value="2">16bit</option>
+            <option value="3">18bit</option>
+            <option value="99">Disabled</option>
+        </select>
+        <label style="width: auto;"> +/- Range</label>
+        <select type="text" id="node-input-gain0" style="width: auto;">
+            <option value="0">2.048V</option>
+            <option value="1">1.024V</option>
+            <option value="2">0.512V</option>
+            <option value="3">0.256V</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-factor0"><i class="fa fa-calculator"></i> Factor</label>
+        <input id="node-input-factor0" placeholder="Factor" input type="text" required style="width: 8em;">
+        <label style="width: auto;"> Offset</label>
+        <input id="node-input-offset0" placeholder="Offset" input type="text" required style="width: 8em;">
+    </div>
+    <div id="div-input1" class="form-row">
+        <label style="width:100%; border-bottom: 1px solid #a9a9a9;">Input CH2</label>
+        <div class="form-row">
+            <label for="node-input-mode1"><i class="fa fa-retweet"></i> Mode</label>
+            <select type="text" id="node-input-mode1" style="width: auto;">
+                <option value="0">12bit</option>
+                <option value="1">14bit</option>
+                <option value="2">16bit</option>
+                <option value="3">18bit</option>
+                <option value="99">Disabled</option>
+            </select>
+        <label style="width: auto;"> +/- Range</label>
+        <select type="text" id="node-input-gain1" style="width: auto;">
+            <option value="0">2.048V</option>
+            <option value="1">1.024V</option>
+            <option value="2">0.512V</option>
+            <option value="3">0.256V</option>
+        </select>
+        </div>
+        <div class="form-row">
+            <label for="node-input-factor1"><i class="fa fa-calculator"></i> Factor</label>
+            <input id="node-input-factor1" placeholder="Factor" input type="text" required style="width: 8em;">
+            <label style="width: auto;"> Offset</label>
+            <input id="node-input-offset1" placeholder="Offset" input type="text" required style="width: 8em;">
+        </div>
+    </div>
+    <div id="div-input2" class="form-row">
+        <label style="width:100%; border-bottom: 1px solid #a9a9a9;">Input CH3</label>
+        <div class="form-row">
+            <label for="node-input-mode2"><i class="fa fa-retweet"></i> Mode</label>
+            <select type="text" id="node-input-mode2" style="width: auto;">
+                <option value="0">12bit</option>
+                <option value="1">14bit</option>
+                <option value="2">16bit</option>
+                <option value="3">18bit</option>
+                <option value="99">Disabled</option>
+            </select>
+        <label style="width: auto;"> +/- Range</label>
+        <select type="text" id="node-input-gain2" style="width: auto;">
+            <option value="0">2.048V</option>
+            <option value="1">1.024V</option>
+            <option value="2">0.512V</option>
+            <option value="3">0.256V</option>
+        </select>
+        </div>
+        <div class="form-row">
+            <label for="node-input-factor2"><i class="fa fa-calculator"></i> Factor</label>
+            <input id="node-input-factor2" placeholder="Factor" input type="text" required style="width: 8em;">
+            <label style="width: auto;"> Offset</label>
+            <input id="node-input-offset2" placeholder="Offset" input type="text" required style="width: 8em;">
+        </div>
+    </div>
+    <div id="div-input3" class="form-row">
+        <label style="width:100%; border-bottom: 1px solid#a9a9a9;">Input CH4</label>
+        <div class="form-row">
+            <label for="node-input-mode3"><i class="fa fa-retweet"></i> Mode</label>
+            <select type="text" id="node-input-mode3" style="width: auto;">
+                <option value="0">12bit</option>
+                <option value="1">14bit</option>
+                <option value="2">16bit</option>
+                <option value="3">18bit</option>
+                <option value="99">Disabled</option>
+            </select>
+        <label style="width: auto;"> +/- Range</label>
+        <select type="text" id="node-input-gain3" style="width: auto;">
+            <option value="0">2.048V</option>
+            <option value="1">1.024V</option>
+            <option value="2">0.512V</option>
+            <option value="3">0.256V</option>
+        </select>
+        </div>
+        <div class="form-row">
+            <label for="node-input-factor3"><i class="fa fa-calculator"></i> Factor</label>
+            <input id="node-input-factor3" placeholder="Factor" input type="text" required style="width: 8em;">
+            <label style="width: auto;"> Offset</label>
+            <input id="node-input-offset3" placeholder="Offset" input type="text" required style="width: 8em;">
+        </div>
+    </div>
+</script>
